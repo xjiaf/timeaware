@@ -21,6 +21,9 @@ run_command() {
                 lastfm)
                     python train.py --dataset lastfm --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_lastfm --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
                     ;;
+                wikipedia_fm)
+                    python train.py --dataset wikipedia_fm --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_wiki_fm --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
                 *)
                     echo "未知的数据集: $data"
                     ;;
@@ -40,6 +43,9 @@ run_command() {
                     ;;
                 lastfm)
                     python train_link_prediction.py --dataset_name lastfm --prefix graphmixer_tgsl_lastfm --log_name graphmixer_tgsl_lastfm --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                wikipedia_fm)
+                    python train_link_prediction.py --dataset_name wikipedia_fm --prefix graphmixer_tgsl_wiki_fm --log_name graphmixer_tgsl_wiki_fm --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
                     ;;
                 *)
                     echo "未知的数据集: $data"
