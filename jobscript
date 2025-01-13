@@ -1,0 +1,79 @@
+#!/bin/bash --login
+#$ -cwd
+#$ -l nvidia_v100            # Can instead use 'nvidia_a100' for the A100 GPUs (if permitted!)
+run_command() {
+    local data=$1
+    local model=$2
+
+    case $model in
+        TGAT)
+            cd TGAT+TGSL/
+            case $data in
+                wikipedia)
+                    python train.py --dataset wikipedia --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_wiki --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                uci)
+                    python train.py --dataset uci --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_uci --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                enron)
+                    python train.py --dataset enron --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_enron --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                lastfm)
+                    python train.py --dataset lastfm --uniform --agg_method attn --attn_mode prod --cuda 0 --prefix tgat_tgsl_lastfm --seed 2023 --tau 0.1 --ratio 0.8 --can_type 1st --can_nn 10 --rnn_layer 3 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                *)
+                    echo "未知的数据集: $data"
+                    ;;
+            esac
+            ;;
+        Mixer)
+            cd GraphMixer+TGSL/
+            case $data in
+                wikipedia)
+                    python train_link_prediction.py --dataset_name wikipedia --prefix graphmixer_tgsl_wiki --log_name graphmixer_tgsl_wiki --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                uci)
+                    python train_link_prediction.py --dataset_name uci --prefix graphmixer_tgsl_uci --log_name graphmixer_tgsl_uci --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                enron)
+                    python train_link_prediction.py --dataset_name enron --prefix graphmixer_tgsl_enron --log_name graphmixer_tgsl_enron --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                lastfm)
+                    python train_link_prediction.py --dataset_name lastfm --prefix graphmixer_tgsl_lastfm --log_name graphmixer_tgsl_lastfm --model_name GraphMixer --load_best_configs --num_runs 1 --gpu 0 --tau 0.1 --ratio 0.008 --can_nn 10 --can_type 3rd --rnn_layer 1 --coe 0.2 --K 512 --gtau 1.0
+                    ;;
+                *)
+                    echo "未知的数据集: $data"
+                    ;;
+            esac
+            ;;
+        *)
+            echo "未知的模型: $model"
+            ;;
+    esac
+}
+# Activate conda environment
+conda activate timeaware
+
+# Copy files to GPU node's local storage
+cp -r ~/scratch/timeaware/ $TMPDIR
+
+# Change to working directory
+cd $TMPDIR/timeaware/
+
+# Run the command with specified dataset and mode
+run_command "$@"
+
+
+# Copy results back to scratch area
+rsync -av --progress \
+    --exclude 'jobscript.e*' \
+    --exclude 'jobscript.o*' \
+    "$TMPDIR/timeaware/" ~/scratch/timeaware/
+
+# Update from git
+cd ~/scratch/timeaware/
+git pull
+
+sleep 3
+#$ -m ea
+#$ -M jiafeng.xiong@manchester.ac.uk     # Send email when finished.
