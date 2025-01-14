@@ -45,11 +45,11 @@ args = parser.parse_args()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.cuda)
 
-if args.dataset == 'wikipedia':
+if args.dataset in ['wikipedia', 'wikipedia_fm']:
     config = WikiConfig()
 elif args.dataset == 'reddit':
     config = RedditConfig()
-elif args.dataset == 'escorts':
+elif args.dataset in ['escorts', 'uci', 'enron']:
     config = ESConfig()
 else:
     raise Exception('Dataset Error')
@@ -237,11 +237,11 @@ def eval_one_epoch(hint, tgan, view_learner, edge_rnn, sample_time_encoder, samp
             # Recover
             tgan.ngh_finder = ngh_finder_ori
             tgan.edge_raw_embed = edge_raw_embed_ori
-            
+
             pred_score = np.concatenate([(pos_prob).cpu().numpy(), (neg_prob).cpu().numpy()])
             pred_label = pred_score > 0.5
             true_label = np.concatenate([np.ones(size), np.zeros(size)])
-            
+
             val_acc.append((pred_label == true_label).mean())
             val_ap.append(average_precision_score(true_label, pred_score))
             val_auc.append(roc_auc_score(true_label, pred_score))
@@ -421,7 +421,7 @@ for epoch in range(NUM_EPOCH):
         with torch.no_grad():
             pos_label = torch.ones(size, dtype=torch.float, device=device)
             neg_label = torch.zeros(size, dtype=torch.float, device=device)
-        
+
         optimizer.zero_grad()
         model = model.train()
 
