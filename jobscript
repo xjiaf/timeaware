@@ -59,6 +59,7 @@ run_command() {
 }
 # Activate conda environment
 conda activate timeaware
+module load libs/nvidia-hpc-sdk/22.3
 
 # Copy files to GPU node's local storage
 cp -r ~/scratch/timeaware/ $TMPDIR

@@ -42,11 +42,13 @@ def preprocess(path, data_name):
             idx_list.append(idx)
 
             feat_l.append(feat)
-    return pd.DataFrame({'u': u_list,
-                         'i': i_list,
-                         'ts': ts_list,
-                         'label': label_list,
-                         'idx': idx_list}), np.array(feat_l)
+    return pd.DataFrame({
+        'u': u_list,
+        'i': i_list,
+        'ts': ts_list,
+        'label': label_list,
+        'idx': idx_list
+    }), np.array(feat_l)
 
 
 def reindex(df):
@@ -98,7 +100,11 @@ def run(data_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, help='dataset', choices=['wikipedia', 'reddit', 'escorts'], default='wikipedia')
+    parser.add_argument('--dataset',
+                        type=str,
+                        help='dataset',
+                        choices=['wikipedia', 'reddit', 'escorts'],
+                        default='wikipedia')
     args = parser.parse_args()
     os.makedirs(f"./processed/", exist_ok=True)
     os.makedirs(f"./log/", exist_ok=True)
